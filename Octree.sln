@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Cour", "Cour\Cour.vcxproj", "{3588BED0-A88F-4A57-B11D-1C656459DA36}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Octree", "Octree\Octree.vcxproj", "{3588BED0-A88F-4A57-B11D-1C656459DA36}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
