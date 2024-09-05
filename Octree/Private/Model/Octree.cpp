@@ -41,21 +41,21 @@ bool Octree::insert(const Vector& index, const int value)
 
     const position position = get_position(index);
 
-    if (children_[position]->point_ == nullptr)
-    {
-        return children_[position]->insert(index, value);
-    }
 
-    if (children_[position]->point_->value == -1)
+    if (children_[position] == nullptr)
     {
         delete children_[position];
         children_[position] = new Octree(index, ray_ / 2, value);
         return true;
     }
+    
+    if (children_[position]->point_ == nullptr)
+    {
+        return children_[position]->insert(index, value);
+    }
 
     if (children_[position]->point_->index == index)
     {
-        std::cout << "Update value\n";
         children_[position]->point_->value = value;
         return true;
     }

@@ -51,10 +51,6 @@ public:
         point_ = nullptr;
 
         children_.assign(8, nullptr);
-        for (int i = 0; i < 8; ++i)
-        {
-            children_[i] = new Octree();
-        }
     }
 
     bool insert(const Vector& index, int value);

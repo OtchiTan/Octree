@@ -37,6 +37,11 @@ struct Vector
     {
         return x == index.x && y == index.y && z == index.z;
     }
+    
+    bool operator!=(const Vector& index) const
+    {
+        return x != index.x || y != index.y || z != index.z;
+    }
 
     Vector operator*(const int& multiplier) const
     {

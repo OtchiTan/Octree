@@ -9,8 +9,8 @@ using namespace std;
 using namespace chrono;
 
 int octree_size = 67108864;
-int render_distance = 1;
-int chunk_size = 1;
+int render_distance = 2;
+int chunk_size = 16;
 
 int main()
 {
@@ -29,7 +29,10 @@ int main()
         {
             for (int cz = -render_distance; cz < render_distance; ++cz)
             {
-                world->compute_chunk({cx,cy,cz});
+                if (Vector(cx,cy,cz) != Vector(0))
+                {
+                    world->compute_chunk({cx,cy,cz});
+                }
             }
         }
     }
