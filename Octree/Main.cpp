@@ -8,56 +8,56 @@
 using namespace std;
 using namespace chrono;
 
-int octree_size = 67108864;
-int render_distance = 2;
+int render_distance = 4;
 int chunk_size = 16;
+int chunks_to_compute = 10;
 
 int main()
 {
+    time_point<system_clock> start, end;
     cout << "Start\n";
 
-    const auto world = new World(octree_size,chunk_size);
-    vector<thread> threads;
-    
-    cout << "Start Generation\n";
+    vector<World*> worlds;
+    worlds.assign(chunks_to_compute,nullptr);
 
-    time_point<system_clock> start = system_clock::now();
-
-    for (int cx = -render_distance; cx < render_distance; ++cx)
+    for (int i = 0; i < chunks_to_compute; ++i)
     {
-        for (int cy = -render_distance; cy < render_distance; ++cy)
-        {
-            for (int cz = -render_distance; cz < render_distance; ++cz)
-            {
-                if (Vector(cx,cy,cz) != Vector(0))
-                {
-                    world->compute_chunk({cx,cy,cz});
-                }
-            }
-        }
+        worlds[i] = new World(chunk_size, render_distance);
     }
-
-    time_point<system_clock> end = system_clock::now();
-
-    cout << "Insert Duration " << duration_cast<seconds>(end - start).count() << " s \n";
-    cout << "Insert Duration " << duration_cast<milliseconds>(end - start).count() << " ms \n";
-
+    
     start = system_clock::now();
-    for (int cx = 0; cx < render_distance; ++cx)
+
+    for (int i = 0; i < chunks_to_compute; ++i)
     {
-        for (int cy = 0; cy < render_distance; ++cy)
-        {
-            for (int cz = 0; cz < render_distance; ++cz)
-            {
-                world->read_chunk({cx,cy,cz});
-            }
-        }
+        worlds[i]->compute_chunk({0});
     }
-    
+
     end = system_clock::now();
 
-    cout << "Read Duration " << duration_cast<seconds>(end - start).count() << " s \n";
-    cout << "Read Duration " << duration_cast<milliseconds>(end - start).count() << " ms \n";
+    cout << "Mono thread Insert Duration " << duration_cast<milliseconds>(end - start).count() << " ms \n";
+    
+    for (int i = 0; i < chunks_to_compute; ++i)
+    {
+        worlds[i] = new World(chunk_size, render_distance);
+    }
 
+    vector<thread> threads;
+    threads.resize(chunks_to_compute);
+    
+    for (int i = 0; i < chunks_to_compute; ++i)
+    {
+        threads[i] = thread(&World::compute_chunk,worlds[i],Vector(0));
+    }
+
+    start = system_clock::now();
+    
+    for (int i = 0; i < chunks_to_compute; ++i)
+    {
+        threads[i].join();
+    }
+
+    end = system_clock::now();
+    
+    cout << "Multi thread Insert Duration " << duration_cast<milliseconds>(end - start).count() << " ms \n";
     return 0;
 }

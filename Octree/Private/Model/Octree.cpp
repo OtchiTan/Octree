@@ -41,7 +41,6 @@ bool Octree::insert(const Vector& index, const int value)
 
     const position position = get_position(index);
 
-
     if (children_[position] == nullptr)
     {
         delete children_[position];
@@ -90,6 +89,11 @@ int Octree::find(const Vector& index) const
     }
     const position position = get_position(index);
 
+    if (children_[position] == nullptr)
+    {
+        return -1;
+    }
+    
     if (children_[position]->point_ == nullptr)
     {
         return children_[position]->find(index);
@@ -143,16 +147,17 @@ bool Octree::insert_octree(Octree* octree)
     }
     
     const position position = get_position(octree->center_);
-
-    if (children_[position]->point_ == nullptr)
-    {
-        return children_[position]->insert_octree(octree);
-    }
-
-    if (children_[position]->point_->value == -1)
+    
+    if (children_[position] == nullptr)
     {
         delete children_[position];
         children_[position] = new Octree(ray_ / 2, octree->center_);
+        return true;
+    }
+    
+    if (children_[position]->point_ == nullptr)
+    {
+        return children_[position]->insert_octree(octree);
     }
     
     if (ray_ / 2 == octree->ray_)
