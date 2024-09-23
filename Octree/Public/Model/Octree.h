@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include <iostream>
+#include <mutex>
 #include <vector>
 
 #include "Point.h"
@@ -23,6 +24,8 @@ class Octree
     Vector center_;
     int ray_;
     std::vector<Octree*> children_;
+
+    std::mutex mutex_;
 
     Octree()
     {
@@ -54,7 +57,7 @@ public:
     }
 
     bool insert(const Vector& index, int value);
-    int find(const Vector& index) const;
+    int find(const Vector& index);
 
     Octree* find_octree(const Vector& index, int chunk_size);
     bool insert_octree(Octree* octree);

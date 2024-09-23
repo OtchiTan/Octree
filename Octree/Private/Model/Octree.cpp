@@ -41,21 +41,25 @@ bool Octree::insert(const Vector& index, const int value)
 
     const position position = get_position(index);
 
+    mutex_.lock();
     if (children_[position] == nullptr)
     {
         delete children_[position];
-        children_[position] = new Octree(index, ray_ / 2, value);
+        children_[position] = new Octree(index, ray_ >> 1, value);
+        mutex_.unlock();
         return true;
     }
     
     if (children_[position]->point_ == nullptr)
     {
+        mutex_.unlock();
         return children_[position]->insert(index, value);
     }
-
+    
     if (children_[position]->point_->index == index)
     {
         children_[position]->point_->value = value;
+        mutex_.unlock();
         return true;
     }
 
@@ -63,18 +67,20 @@ bool Octree::insert(const Vector& index, const int value)
     delete children_[position];
     children_[position] = nullptr;
 
-    const int new_ray = ray_ / 2;
+    const int new_ray = ray_ >> 1;
 
     children_[position] = new Octree(
         new_ray,
         PointPosition[position] * new_ray + center_
     );
 
+    mutex_.unlock();
+    
     children_[position]->insert(old_stored_point.index, old_stored_point.value);
     return children_[position]->insert(index, value);
 }
 
-int Octree::find(const Vector& index) const
+int Octree::find(const Vector& index)
 {
     if (index.x >= center_.x + ray_ ||
        index.x < center_.x - ray_ ||
@@ -89,19 +95,26 @@ int Octree::find(const Vector& index) const
     }
     const position position = get_position(index);
 
+    mutex_.lock();
     if (children_[position] == nullptr)
     {
+        mutex_.unlock();
         return -1;
     }
     
     if (children_[position]->point_ == nullptr)
     {
+        mutex_.unlock();
         return children_[position]->find(index);
     }
 
     if (index == children_[position]->point_->index)
+    {
+        mutex_.unlock();
         return children_[position]->point_->value;
+    }
 
+    mutex_.unlock();
     return -1;
 }
 
@@ -123,12 +136,15 @@ Octree* Octree::find_octree(const Vector& index, int chunk_size)
         return this;
     
     const position position = get_position(index);
-    
+
+    mutex_.lock();
     if (children_[position]->point_ == nullptr)
     {
+        mutex_.unlock();
         return children_[position]->find_octree(index, chunk_size);
     }
 
+    mutex_.unlock();
     return nullptr;
 }
 
@@ -147,25 +163,30 @@ bool Octree::insert_octree(Octree* octree)
     }
     
     const position position = get_position(octree->center_);
-    
+
+    mutex_.lock();
     if (children_[position] == nullptr)
     {
         delete children_[position];
-        children_[position] = new Octree(ray_ / 2, octree->center_);
+        children_[position] = new Octree(ray_ >> 1, octree->center_);
+        mutex_.unlock();
         return true;
     }
     
     if (children_[position]->point_ == nullptr)
     {
+        mutex_.unlock();
         return children_[position]->insert_octree(octree);
     }
     
-    if (ray_ / 2 == octree->ray_)
+    if (ray_ >> 1 == octree->ray_)
     {
         delete children_[position];
         children_[position] = octree;
+        mutex_.unlock();
         return true;
     }
     
+    mutex_.unlock();
     return children_[position]->insert_octree(octree);
 }
