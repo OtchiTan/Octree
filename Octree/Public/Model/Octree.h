@@ -23,20 +23,28 @@ class Octree
 
     Vector center_;
     int ray_;
-    std::vector<Octree*> children_;
-
-    std::mutex mutex_;
+    std::atomic<Octree*> children_[8];
 
     Octree()
     {
         point_ = new Point();
         ray_ = -1;
         center_ = {};
+
+        for (int i = 0; i < 8; ++i)
+        {
+            children_[i].store(nullptr);
+        }
     }
     
     Octree(const Vector& center, const int ray, const int value): center_(center),ray_(ray)
     {
         point_ = new Point(center, value);
+
+        for (int i = 0; i < 8; ++i)
+        {
+            children_[i].store(nullptr);
+        }
     }
 
     inline position get_position(const Vector& index) const;
@@ -53,7 +61,10 @@ public:
         ray_ = size;
         point_ = nullptr;
 
-        children_.assign(8, nullptr);
+        for (int i = 0; i < 8; ++i)
+        {
+            children_[i].store(nullptr);
+        }
     }
 
     bool insert(const Vector& index, int value);

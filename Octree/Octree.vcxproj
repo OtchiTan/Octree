@@ -305,7 +305,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Public\Model\Position.h" />
     <ClInclude Include="Public\Model\Vector.h" />
     <ClInclude Include="Public\Model\Octree.h" />
     <ClInclude Include="Public\Model\Point.h" />
